@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النظام المالي الذكي</title>
+
+<style>
+body{font-family:Arial;direction:rtl;margin:0;background:#eef2f5}
+header{background:#1a252f;color:#fff;padding:15px;text-align:center}
+.tabs{display:flex;background:#2c3e50}
+.tabs button{flex:1;color:#fff;padding:10px;border:none;background:none}
+.tabs button.active{background:#16a085}
+.section{display:none;padding:15px}
+.section.active{display:block}
+.item{background:#fff;padding:10px;margin:5px 0}
+button{padding:6px;margin:3px;border:none}
+.add{background:green;color:#fff}
+.del{background:red;color:#fff}
+.edit{background:orange;color:#fff}
+.alert{font-weight:bold}
+input{width:100%;padding:8px;margin:4px 0}
+</style>
+
+</head>
+
+<body>
+
+<header>📊 النظام المالي الذكي</header>
+
+<div class="tabs">
+<button onclick="tab(0)">القروض</button>
+<button onclick="tab(1)">السلف والعقار</button>
+<button onclick="tab(2)">المصاريف</button>
+<button onclick="tab(3)">التحليل الذكي</button>
+</div>
+
+<div class="section active"><div id="bank"></div></div>
+<div class="section"><div id="loans"></div></div>
+<div class="section"><div id="expenses"></div></div>
+
+<div class="section">
+<input id="salary" type="number" placeholder="راتبك">
+
+<button onclick="analyze()">تحليل</button>
+
+<p id="result"></p>
+<p id="status" class="alert"></p>
+
+<button onclick="smartPlan()">حل ذكي</button>
+<p id="plan"></p>
+
+<button onclick="makeLetter()">إنشاء خطاب</button>
+<pre id="letter"></pre>
+
+<button onclick="window.print()">🖨️ طباعة</button>
+<button onclick="share()">📤 واتساب</button>
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("smart")) || {
+bank:[
+{name:"الراجحي",amount:5311,start:"2024-01-27",months:60},
+{name:"الرياض",amount:5168,start:"2024-01-27",months:60}
+],
+loans:[
+{name:"قسط الأرض",amount:2000},
+{name:"سلف عائلية",amount:32000}
+],
+expenses:[
+{name:"بقالة",amount:956},
+{name:"كهرباء",amount:309},
+{name:"تمارا",amount:316}
+]
+};
+
+function save(){
+localStorage.setItem("smart",JSON.stringify(data))
+}
+
+function tab(i){
+document.querySelectorAll('.section').forEach((s,idx)=>{
+s.classList.toggle('active',idx===i)
+})
+}
+
+function monthsLeft(start,months){
+let s=new Date(start)
+let now=new Date()
+let passed=(now-s)/(1000*60*60*24*30)
+return Math.max(0,Math.ceil(months-passed))
+}
+
+function render(){
+["bank","loans","expenses"].forEach(type=>{
+let box=document.getElementById(type)
+box.innerHTML=""
+
+data[type].forEach((x,i)=>{
+
+let extra=""
+
+if(x.start){
+let left=monthsLeft(x.start,x.months)
+extra=`<br>متبقي ${left} شهر`
+}
+
+box.innerHTML+=`
+<div class="item">
+<b>${x.name}</b> - ${x.amount} ريال
+${extra}
+<br>
+<button class="del" onclick="del('${type}',${i})">حذف</button>
+<button class="edit" onclick="edit('${type}',${i})">تعديل</button>
+</div>`
+})
+})
+}
+
+function del(type,i){
+data[type].splice(i,1)
+save()
+render()
+}
+
+function edit(type,i){
+let n=prompt("اسم",data[type][i].name)
+let a=prompt("مبلغ",data[type][i].amount)
+
+if(n) data[type][i].name=n
+if(a) data[type][i].amount=Number(a)
+
+save()
+render()
+}
+
+function analyze(){
+
+let salary=Number(document.getElementById("salary").value)
+
+let total=0
+Object.values(data).forEach(arr=>{
+arr.forEach(x=> total+=x.amount)
+})
+
+let ratio=(total/salary)*100
+let remain=salary-total
+
+result.innerText=`إجمالي: ${total} ريال
+المتبقي: ${remain} ريال
+نسبة الاستقطاع: ${ratio.toFixed(1)}%`
+
+if(remain<0){
+status.innerText="🔴 خطر مالي"
+}else if(ratio>60){
+status.innerText="🟠 ضغط مالي عالي"
+}else{
+status.innerText="🟢 وضع آمن"
+}
+}
+
+function smartPlan(){
+plan.innerText=`
+✔️ أوقف المصاريف غير الضرورية
+✔️ تفاوض لإعادة جدولة القروض
+✔️ ركّز على سداد الأعلى فائدة
+✔️ حاول زيادة الدخل
+`
+}
+
+function makeLetter(){
+letter.innerText=`
+إلى الجهة المختصة
+
+أواجه التزامات مالية مرتفعة،
+وأطلب إعادة جدولة القروض ودعم وضعي المالي.
+
+وتفضلوا بقبول الاحترام
+`
+}
+
+function share(){
+let t=result.innerText
+window.open("https://wa.me/?text="+encodeURIComponent(t))
+}
+
+render()
+
+</script>
+
+</body>
+</html>
