@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدير مصروفاتي PRO</title>
+
+<style>
+body {font-family: Arial; direction: rtl; margin:0; background:#f4f6f8;}
+header {background:#1f2d3d; color:#fff; padding:15px; text-align:center;}
+.tabs {display:flex; overflow:auto; background:#2c3e50;}
+.tabs button {flex:1; padding:10px; color:white; background:none; border:none;}
+.tabs button.active {background:#16a085;}
+.section {display:none; padding:15px;}
+.section.active {display:block;}
+input, select {width:100%; padding:10px; margin:5px 0;}
+button {padding:10px; border:none; margin-top:5px;}
+.add {background:#27ae60; color:white;}
+.delete {background:#c0392b; color:white; float:left;}
+.item {background:white; padding:10px; margin:5px 0;}
+.alert {color:red; font-weight:bold;}
+</style>
+</head>
+
+<body>
+
+<header>📊 مدير مصروفاتي PRO</header>
+
+<div class="tabs">
+<button onclick="showTab(0)">الالتزامات</button>
+<button onclick="showTab(1)">الإلزامي</button>
+<button onclick="showTab(2)">اختياري</button>
+<button onclick="showTab(3)">بياناتي</button>
+<button onclick="showTab(4)">التحليل</button>
+</div>
+
+<!-- الالتزامات -->
+<div class="section active">
+<h3>الالتزامات</h3>
+
+<select id="name1">
+<option>قرض بنكي</option>
+<option>بطاقة فيزا</option>
+<option>شركة تقسيط</option>
+<option>إيجار</option>
+<option>كهرباء</option>
+<option>ماء</option>
+<option>اتصالات</option>
+<option>قسط عقار</option>
+<option>سلف</option>
+</select>
+
+<input id="amount1" type="number" placeholder="المبلغ">
+<input id="start1" type="date">
+<input id="end1" type="date">
+
+<button class="add" onclick="addItem('commitment')">إضافة</button>
+<div id="commitment"></div>
+</div>
+
+<!-- إلزامي -->
+<div class="section">
+<h3>مصروفات إلزامية</h3>
+
+<select id="name2">
+<option>بقالة</option>
+<option>خضار</option>
+<option>حلاق</option>
+<option>صيدلية</option>
+<option>بنزين</option>
+</select>
+
+<input id="amount2" type="number">
+<button class="add" onclick="addItem('mandatory')">إضافة</button>
+<div id="mandatory"></div>
+</div>
+
+<!-- اختياري -->
+<div class="section">
+<h3>مصروفات اختيارية</h3>
+
+<select id="name3">
+<option>مساعدة</option>
+<option>مطعم</option>
+<option>كوفي</option>
+<option>سفر</option>
+<option>هدية</option>
+<option>علاج</option>
+</select>
+
+<input id="amount3" type="number">
+<button class="add" onclick="addItem('optional')">إضافة</button>
+<div id="optional"></div>
+</div>
+
+<!-- بيانات -->
+<div class="section">
+<h3>بياناتي</h3>
+<input id="username" placeholder="الاسم">
+<input id="salary" type="number" placeholder="الراتب">
+<button onclick="saveData()">حفظ</button>
+</div>
+
+<!-- تحليل -->
+<div class="section">
+<h3>التحليل المالي</h3>
+
+<button onclick="analyze()">احسب</button>
+<p id="result"></p>
+<p id="alert" class="alert"></p>
+
+<button onclick="solution()">معالجة الوضع</button>
+<p id="solution"></p>
+
+<button onclick="printPage()">🖨️ طباعة</button>
+<button onclick="shareWhats()">📤 واتساب</button>
+
+<button onclick="generateLetter()">📄 خطاب</button>
+<pre id="letter"></pre>
+
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("finance")) || {
+commitment: [],
+mandatory: [],
+optional: [],
+user: {}
+};
+
+function save(){
+localStorage.setItem("finance", JSON.stringify(data));
+}
+
+function showTab(i){
+document.querySelectorAll('.section').forEach((s, index)=>{
+s.classList.toggle('active', index===i);
+});
+}
+
+function addItem(type){
+let obj = {};
+
+if(type==="commitment"){
+obj = {
+name:name1.value,
+amount:Number(amount1.value),
+start:start1.value,
+end:end1.value
+};
+}
+if(type==="mandatory"){
+obj = {name:name2.value, amount:Number(amount2.value)};
+}
+if(type==="optional"){
+obj = {name:name3.value, amount:Number(amount3.value)};
+}
+
+data[type].push(obj);
+save();
+render(type);
+}
+
+function render(type){
+let container = document.getElementById(type);
+container.innerHTML = "";
+
+data[type].forEach((i, index)=>{
+container.innerHTML += `
+<div class="item">
+${i.name} - ${i.amount} ريال
+${i.start ? "<br>من: "+i.start+" إلى: "+i.end : ""}
+<button class="delete" onclick="removeItem('${type}',${index})">حذف</button>
+</div>`;
+});
+}
+
+function removeItem(type,index){
+data[type].splice(index,1);
+save();
+render(type);
+}
+
+function saveData(){
+data.user = {
+name:username.value,
+salary:Number(salary.value)
+};
+save();
+alert("تم الحفظ");
+}
+
+function analyze(){
+let total = 0;
+
+Object.values(data).forEach(arr=>{
+if(Array.isArray(arr)){
+arr.forEach(i=> total += Number(i.amount||0));
+}
+});
+
+let salary = data.user.salary || 0;
+let remain = salary - total;
+
+result.innerText = `إجمالي المصروفات: ${total} ريال
+المتبقي: ${remain} ريال`;
+
+if(remain < 0){
+alert.innerText = "⚠️ لديك عجز مالي!";
+}else if(remain < salary*0.2){
+alert.innerText = "⚠️ ضغط مالي مرتفع";
+}else{
+alert.innerText = "✅ وضعك المالي جيد";
+}
+}
+
+function solution(){
+solution.innerText = `
+✔️ تقليل المصروفات الاختيارية
+✔️ إعادة جدولة القروض
+✔️ تقليل الكماليات
+✔️ زيادة الدخل الجانبي
+`;
+}
+
+function printPage(){
+window.print();
+}
+
+function shareWhats(){
+let text = `ملخص مصروفاتي:
+إجمالي: ${result.innerText}`;
+window.open("https://wa.me/?text="+encodeURIComponent(text));
+}
+
+function generateLetter(){
+letter.innerText = `
+إلى الجهة المختصة
+
+أفيدكم بأنني أمر بظروف مالية صعبة نتيجة التزامات مالية متعددة،
+وأرجو منكم التكرم بدراسة وضعي وإعادة جدولة الالتزامات البنكية.
+
+وتفضلوا بقبول الاحترام
+`;
+}
+
+["commitment","mandatory","optional"].forEach(render);
+
+</script>
+
+</body>
+</html>
