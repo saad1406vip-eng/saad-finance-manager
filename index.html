@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+  <title>مدير مصروفاتي الذكي | التطبيق المالي الشامل</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Tahoma', system-ui, -apple-system, 'Cairo', sans-serif;
+      background: #f1f5f9;
+      direction: rtl;
+      padding-bottom: 25px;
+    }
+
+    /* رأس احترافي */
+    .app-header {
+      background: linear-gradient(135deg, #0f2b3d 0%, #1a4a6f 100%);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 0 0 28px 28px;
+      margin-bottom: 20px;
+    }
+
+    .app-header h1 {
+      font-size: 1.8rem;
+      letter-spacing: -0.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .app-header p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 6px;
+    }
+
+    /* تبويبات أنيقة */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      background: white;
+      margin: 0 16px 20px;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: #1e6f5c;
+      color: white;
+      box-shadow: inset 0 -2px 0 #ffd966;
+    }
+
+    /* محتوى الأقسام */
+    .section {
+      display: none;
+      padding: 0 16px;
+      animation: fade 0.25s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    /* البطاقات والعناصر */
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.03);
+      transition: all 0.2s;
+      border: 1px solid #e9edf2;
+    }
+
+    .item {
+      background: #fefefe;
+      border-radius: 20px;
+      padding: 14px 16px;
+      margin: 12px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-right: 5px solid #1e6f5c;
+      transition: all 0.2s;
+    }
+
+    .item b {
+      font-size: 1rem;
+      color: #0f2b3d;
+    }
+
+    .item-detail {
+      font-size: 0.9rem;
+      color: #2c3e50;
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .amount-badge {
+      background: #eef2ff;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #1e6f5c;
+    }
+
+    .btn-group {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-add {
+      background: #1e6f5c;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .btn-delete {
+      background: #e53e3e;
+      color: white;
+    }
+
+    .btn-edit {
+      background: #f39c12;
+      color: white;
+    }
+
+    .btn-smart {
+      background: #2c3e50;
+      color: white;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: white;
+    }
+
+    .btn-print {
+      background: #4b5563;
+      color: white;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 28px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #fff;
+      transition: 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1e6f5c;
+      box-shadow: 0 0 0 2px rgba(30,111,92,0.2);
+    }
+
+    .result-box {
+      background: #eef2f9;
+      border-radius: 28px;
+      padding: 20px;
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    .status-badge {
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 50px;
+      margin-top: 12px;
+    }
+
+    hr {
+      margin: 15px 0;
+      border-color: #e2e8f0;
+    }
+
+    .flex-btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    pre {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>💰 مدير مصروفاتي PRO+</h1>
+  <p>الالتزامات • السلف • المصاريف • تحليل ذكي</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="0">🏦 الالتزامات البنكية</button>
+  <button class="tab-btn" data-tab="1">🏡 عقار + سلف</button>
+  <button class="tab-btn" data-tab="2">🛒 المصاريف الشهرية</button>
+  <button class="tab-btn" data-tab="3">📊 التحليل & الأدوات</button>
+</div>
+
+<!-- قسم البنوك -->
+<div class="section active" id="section-0">
+  <div class="card">
+    <h3 style="margin-bottom: 12px;">📌 القروض البنكية</h3>
+    <div id="bankContainer"></div>
+
+    <input type="text" id="newBankName" placeholder="اسم البنك / التمويل (مثال: الراجحي)">
+    <input type="number" id="newBankAmount" placeholder="القسط الشهري بالريال">
+    <button class="btn-add" id="addBankBtn">➕ إضافة التزام بنكي</button>
+  </div>
+</div>
+
+<!-- قسم القروض/العقار/السلف -->
+<div class="section" id="section-1">
+  <div class="card">
+    <h3 style="margin-bottom: 12px;">🏠 قروض عقارية / سلف شخصية</h3>
+    <div id="loansContainer"></div>
+
+    <input type="text" id="newLoanName" placeholder="الاسم (قسط الأرض - أروى - هند ...)">
+    <input type="number" id="newLoanAmount" placeholder="المبلغ الشهري">
+    <button class="btn-add" id="addLoanBtn">➕ إضافة سلفة / قسط عقاري</button>
+  </div>
+</div>
+
+<!-- قسم المصاريف -->
+<div class="section" id="section-2">
+  <div class="card">
+    <h3 style="margin-bottom: 12px;">🧾 المصاريف التشغيلية</h3>
+    <div id="expensesContainer"></div>
+
+    <input type="text" id="newExpName" placeholder="اسم المصروف (كهرباء، بقالة، تمارا...)">
+    <input type="number" id="newExpAmount" placeholder="المبلغ الشهري">
+    <button class="btn-add" id="addExpBtn">➕ إضافة مصروف</button>
+  </div>
+</div>
+
+<!-- قسم التحليل والأدوات الذكية -->
+<div class="section" id="section-3">
+  <div class="card">
+    <h3>📈 التحليل المالي الذكي</h3>
+    <input type="number" id="salaryInput" placeholder="🏦 أدخل راتبك الشهري">
+    <button class="btn-add" id="analyzeBtn" style="width:100%; margin-top:6px;">📐 احسب الاستدامة</button>
+
+    <div id="analysisResult" class="result-box">
+      <p id="resultText">-- انتظر التحليل --</p>
+      <div id="statusMessage"></div>
+    </div>
+
+    <div class="flex-btns">
+      <button id="smartPlanBtn" class="btn-smart">🧠 خطة سداد ذكية</button>
+      <button id="letterBtn" class="btn-smart">📄 إنشاء خطاب رسمي</button>
+      <button id="shareBtn" class="btn-whatsapp">📱 مشاركة واتساب</button>
+      <button id="printBtn" class="btn-print">🖨️ طباعة التقرير</button>
+    </div>
+
+    <div id="smartPlanOutput" style="background:#f8fafc; border-radius: 20px; padding: 14px; margin-top: 15px;"></div>
+    <div id="letterOutput"></div>
+  </div>
+</div>
+
+<script>
+  // ---------- هيكل البيانات الموحد (دمج جميع الكودات السابقة) ----------
+  let appData = JSON.parse(localStorage.getItem("ultimateFinanceApp")) || {
+    bank: [
+      { name: "تمويل الراجحي", amount: 5311.30, total: 321390, remain: 175795 },
+      { name: "بنك الرياض", amount: 5168.99, total: 310139, remain: 138606 },
+      { name: "تمويل إضافي الراجحي", amount: 0, total: 78700, remain: 55199 }
+    ],
+    loans: [
+      { name: "قسط الأرض", amount: 2000, total: 200000, remain: 64000 },
+      { name: "أروى", amount: 8000 },
+      { name: "هند", amount: 1500 },
+      { name: "محمد سعيد", amount: 2000 },
+      { name: "أسماء سعيد", amount: 10000 },
+      { name: "ميرا", amount: 6000 },
+      { name: "سماح", amount: 900 },
+      { name: "خلود", amount: 1600 },
+      { name: "ليان", amount: 396 },
+      { name: "عمة عزيزة", amount: 500 }
+    ],
+    expenses: [
+      { name: "الكهرباء", amount: 309 },
+      { name: "تمارا", amount: 316.56 },
+      { name: "تابي", amount: 381.53 },
+      { name: "تابي زوجتي", amount: 184.43 },
+      { name: "السواق", amount: 350 },
+      { name: "البقالة", amount: 956 },
+      { name: "الخضار", amount: 165 },
+      { name: "الصيدلية", amount: 400 },
+      { name: "الحلاق", amount: 100 },
+      { name: "جوالك", amount: 517.5 },
+      { name: "جوال المدام", amount: 35 }
+    ]
+  };
+
+  // حفظ البيانات
+  function saveToLocal() {
+    localStorage.setItem("ultimateFinanceApp", JSON.stringify(appData));
+  }
+
+  // عرض جميع الأقسام
+  function renderAllSections() {
+    renderBank();
+    renderLoans();
+    renderExpenses();
+  }
+
+  // عرض قسم البنوك
+  function renderBank() {
+    const container = document.getElementById("bankContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    appData.bank.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>🏦 ${escapeHtml(item.name)}</b>
+          <span class="amount-badge">${formatNumber(item.amount)} ريال</span>
+        </div>
+        ${item.remain ? `<div class="item-detail">📉 المتبقي من التمويل: ${formatNumber(item.remain)} ريال</div>` : ''}
+        <div class="btn-group">
+          <button class="btn-edit" data-type="bank" data-idx="${idx}" data-action="edit">✏️ تعديل</button>
+          <button class="btn-delete" data-type="bank" data-idx="${idx}" data-action="delete">🗑️ حذف</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    // اضافة مستمعات للأزرار
+    attachItemEvents(container);
+  }
+
+  // عرض القروض/السلف
+  function renderLoans() {
+    const container = document.getElementById("loansContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    appData.loans.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>📌 ${escapeHtml(item.name)}</b>
+          <span class="amount-badge">${formatNumber(item.amount)} ريال</span>
+        </div>
+        ${item.remain ? `<div class="item-detail">المتبقي: ${formatNumber(item.remain)} ريال</div>` : ''}
+        <div class="btn-group">
+          <button class="btn-edit" data-type="loans" data-idx="${idx}" data-action="edit">✏️ تعديل</button>
+          <button class="btn-delete" data-type="loans" data-idx="${idx}" data-action="delete">🗑️ حذف</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+    attachItemEvents(container);
+  }
+
+  // عرض المصاريف
+  function renderExpenses() {
+    const container = document.getElementById("expensesContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    appData.expenses.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>🧾 ${escapeHtml(item.name)}</b>
+          <span class="amount-badge">${formatNumber(item.amount)} ريال</span>
+        </div>
+        <div class="btn-group">
+          <button class="btn-edit" data-type="expenses" data-idx="${idx}" data-action="edit">✏️ تعديل</button>
+          <button class="btn-delete" data-type="expenses" data-idx="${idx}" data-action="delete">🗑️ حذف</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+    attachItemEvents(container);
+  }
+
+  // ربط أحداث التعديل والحذف ديناميكياً
+  function attachItemEvents(container) {
+    container.querySelectorAll(".btn-edit").forEach(btn => {
+      btn.removeEventListener("click", handleEdit);
+      btn.addEventListener("click", handleEdit);
+    });
+    container.querySelectorAll(".btn-delete").forEach(btn => {
+      btn.removeEventListener("click", handleDelete);
+      btn.addEventListener("click", handleDelete);
+    });
+  }
+
+  function handleEdit(e) {
+    const btn = e.currentTarget;
+    const type = btn.getAttribute("data-type");
+    const idx = parseInt(btn.getAttribute("data-idx"));
+    const item = appData[type][idx];
+    const newName = prompt("✏️ تعديل الاسم", item.name);
+    const newAmount = prompt("💰 تعديل المبلغ الشهري (ريال)", item.amount);
+    if (newName !== null && newName.trim() !== "") item.name = newName.trim();
+    if (newAmount !== null && !isNaN(parseFloat(newAmount))) item.amount = parseFloat(newAmount);
+    saveToLocal();
+    renderAllSections();
+  }
+
+  function handleDelete(e) {
+    const btn = e.currentTarget;
+    const type = btn.getAttribute("data-type");
+    const idx = parseInt(btn.getAttribute("data-idx"));
+    if (confirm("هل أنت متأكد من حذف هذا البند؟")) {
+      appData[type].splice(idx, 1);
+      saveToLocal();
+      renderAllSections();
+      // تحديث التحليل إذا كان مفتوحاً
+      if (document.getElementById("salaryInput").value) autoAnalyze();
+    }
+  }
+
+  // إضافة عناصر جديدة
+  function addBankItem() {
+    const name = document.getElementById("newBankName").value.trim();
+    const amount = parseFloat(document.getElementById("newBankAmount").value);
+    if (!name || isNaN(amount)) {
+      alert("الرجاء إدخال اسم البنك والمبلغ بشكل صحيح");
+      return;
+    }
+    appData.bank.push({ name, amount });
+    saveToLocal();
+    renderBank();
+    document.getElementById("newBankName").value = "";
+    document.getElementById("newBankAmount").value = "";
+    autoAnalyze();
+  }
+
+  function addLoanItem() {
+    const name = document.getElementById("newLoanName").value.trim();
+    const amount = parseFloat(document.getElementById("newLoanAmount").value);
+    if (!name || isNaN(amount)) {
+      alert("أدخل اسم السلفة والمبلغ");
+      return;
+    }
+    appData.loans.push({ name, amount });
+    saveToLocal();
+    renderLoans();
+    document.getElementById("newLoanName").value = "";
+    document.getElementById("newLoanAmount").value = "";
+    autoAnalyze();
+  }
+
+  function addExpenseItem() {
+    const name = document.getElementById("newExpName").value.trim();
+    const amount = parseFloat(document.getElementById("newExpAmount").value);
+    if (!name || isNaN(amount)) {
+      alert("أدخل اسم المصروف والمبلغ");
+      return;
+    }
+    appData.expenses.push({ name, amount });
+    saveToLocal();
+    renderExpenses();
+    document.getElementById("newExpName").value = "";
+    document.getElementById("newExpAmount").value = "";
+    autoAnalyze();
+  }
+
+  // التحليل المالي الشامل
+  function analyzeFinance() {
+    let salary = parseFloat(document.getElementById("salaryInput").value);
+    if (isNaN(salary) || salary <= 0) {
+      document.getElementById("resultText").innerHTML = "⚠️ يرجى إدخال الراتب أولاً";
+      document.getElementById("statusMessage").innerHTML = "";
+      return;
+    }
+
+    let totalCommitments = 0;
+    // جمع جميع المصروفات + القروض + البنوك
+    appData.bank.forEach(b => totalCommitments += (b.amount || 0));
+    appData.loans.forEach(l => totalCommitments += (l.amount || 0));
+    appData.expenses.forEach(e => totalCommitments += (e.amount || 0));
+
+    const remaining = salary - totalCommitments;
+    const ratio = (totalCommitments / salary) * 100;
+    const resultDiv = document.getElementById("resultText");
+    const statusDiv = document.getElementById("statusMessage");
+
+    resultDiv.innerHTML = `
+      <strong>📌 إجمالي الالتزامات الشهرية:</strong> ${formatNumber(totalCommitments)} ريال<br>
+      <strong>💰 المتبقي من الراتب:</strong> ${formatNumber(remaining)} ريال<br>
+      <strong>📊 نسبة الالتزام:</strong> ${ratio.toFixed(1)}%
+    `;
+
+    let statusHtml = "";
+    if (remaining < 0) {
+      statusHtml = `<div class="status-badge" style="background:#fee2e2; color:#b91c1c;">🔴 خطر مالي عاجل! العجز الشهري ${formatNumber(Math.abs(remaining))} ريال</div>`;
+    } else if (ratio > 65) {
+      statusHtml = `<div class="status-badge" style="background:#fff3e0; color:#b45309;">🟠 ضغط مالي مرتفع جداً، حاول تخفيض المصروفات أو إعادة جدولة القروض</div>`;
+    } else if (ratio > 45) {
+      statusHtml = `<div class="status-badge" style="background:#fff9e0; color:#946800;">🟡 وضع متوسط، تجنب الالتزامات الجديدة</div>`;
+    } else {
+      statusHtml = `<div class="status-badge" style="background:#e0f2e9; color:#1e6f5c;">🟢 وضع مالي ممتاز، استمر في الادخار</div>`;
+    }
+    statusDiv.innerHTML = statusHtml;
+  }
+
+  function autoAnalyze() {
+    if (document.getElementById("salaryInput").value) analyzeFinance();
+  }
+
+  // خطة ذكية
+  function showSmartPlan() {
+    const outputDiv = document.getElementById("smartPlanOutput");
+    outputDiv.innerHTML = `
+      <div style="background:#eef2ff; border-radius:20px; padding:16px;">
+        <b>🧠 خطة الاستقرار المالي المقترحة:</b><br>
+        • ركز على سداد الالتزامات الأعلى فائدة (بطاقات الائتمان أو التمويلات).<br>
+        • تفاوض مع البنوك لإعادة جدولة الأقساط إن أمكن.<br>
+        • قلل المصاريف غير الضرورية (الاشتراكات، المطاعم).<br>
+        • حاول إنشاء مصدر دخل إضافي مؤقت لتغطية الفجوة.<br>
+        • استخدم تطبيق تتبع المصروفات يومياً لتحسين العادات.
+      </div>
+    `;
+  }
+
+  function generateLetter() {
+    const letterDiv = document.getElementById("letterOutput");
+    letterDiv.innerHTML = `
+      <pre style="background:#fff9f0; border-right:4px solid #1e6f5c;">📜 خطاب طلب إعادة جدولة / دعم مالي
+
+إلى من يهمه الأمر،
+
+الموضوع: طلب إعادة هيكلة الالتزامات المالية
+
+تحية طيبة وبعد،
+
+أواجه ظروفًا مالية استثنائية نتيجة ارتفاع الأقساط والالتزامات الشهرية، مما أثر على قدرتي على السداد في مواعيدها. أتقدم بطلب إعادة جدولة المديونيات أو منح مهلة مؤقتة لإتاحة فرصة لتحسين السيولة.
+
+شاكرًا حسن تعاونكم،
+وتفضلوا بقبول فائق الاحترام.
+
+المُقدم: (الاسم)  ................................
+التاريخ: ${new Date().toLocaleDateString('ar-SA')}</pre>
+    `;
+  }
+
+  function shareWhatsApp() {
+    let salary = document.getElementById("salaryInput").value;
+    let totalComm = 0;
+    appData.bank.forEach(b => totalComm += b.amount);
+    appData.loans.forEach(l => totalComm += l.amount);
+    appData.expenses.forEach(e => totalComm += e.amount);
+    let remain = (parseFloat(salary) || 0) - totalComm;
+    let text = `📊 تقريري المالي:
+💳 إجمالي الالتزامات: ${formatNumber(totalComm)} ريال
+💵 المتبقي: ${formatNumber(remain)} ريال
+تم إنشاؤه عبر مدير مصروفاتي الذكي.`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function printReport() {
+    window.print();
+  }
+
+  // مساعدة
+  function formatNumber(num) {
+    if (isNaN(num)) return "0";
+    return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  // التحكم بالتبويبات
+  function initTabs() {
+    const btns = document.querySelectorAll(".tab-btn");
+    btns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tabId = btn.getAttribute("data-tab");
+        document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+        document.getElementById(`section-${tabId}`).classList.add("active");
+        btns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (tabId === "3") {
+          if (document.getElementById("salaryInput").value) analyzeFinance();
+          else document.getElementById("resultText").innerHTML = "✨ أدخل راتبك ثم اضغط تحليل";
+        }
+      });
+    });
+  }
+
+  // ربط الأزرار الرئيسية
+  function bindGlobalButtons() {
+    document.getElementById("addBankBtn").addEventListener("click", addBankItem);
+    document.getElementById("addLoanBtn").addEventListener("click", addLoanItem);
+    document.getElementById("addExpBtn").addEventListener("click", addExpenseItem);
+    document.getElementById("analyzeBtn").addEventListener("click", analyzeFinance);
+    document.getElementById("smartPlanBtn").addEventListener("click", showSmartPlan);
+    document.getElementById("letterBtn").addEventListener("click", generateLetter);
+    document.getElementById("shareBtn").addEventListener("click", shareWhatsApp);
+    document.getElementById("printBtn").addEventListener("click", printReport);
+    document.getElementById("salaryInput").addEventListener("input", () => {
+      if (document.getElementById("salaryInput").value) analyzeFinance();
+    });
+  }
+
+  // بدء التشغيل
+  function init() {
+    renderAllSections();
+    initTabs();
+    bindGlobalButtons();
+    // في حالة وجود راتب مخزن لا شيء
+  }
+
+  init();
+</script>
+</body>
+</html>
