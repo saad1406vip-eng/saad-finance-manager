@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النظام المالي الذكي</title>
+
+<style>
+body{font-family:Arial;direction:rtl;margin:0;background:#eef2f5}
+header{background:#1a252f;color:#fff;padding:15px;text-align:center}
+.tabs{display:flex;background:#2c3e50}
+.tabs button{flex:1;color:#fff;padding:10px;border:none;background:none}
+.tabs button.active{background:#16a085}
+.section{display:none;padding:15px}
+.section.active{display:block}
+.item{background:#fff;padding:10px;margin:5px 0}
+button{padding:6px;margin:3px;border:none}
+.add{background:green;color:#fff}
+.del{background:red;color:#fff}
+.edit{background:orange;color:#fff}
+input,select{width:100%;padding:8px;margin:5px 0}
+</style>
+
+</head>
+
+<body>
+
+<header>📊 النظام المالي الذكي</header>
+
+<div class="tabs">
+<button onclick="tab(0)">إدارة البنود</button>
+<button onclick="tab(1)">القروض</button>
+<button onclick="tab(2)">المصاريف</button>
+<button onclick="tab(3)">التحليل</button>
+</div>
+
+<!-- إدارة البنود -->
+<div class="section active">
+<h3>إدارة البنود (الأساس)</h3>
+
+<input id="itemName" placeholder="اسم البند">
+
+<select id="itemType">
+<option value="bank">بنك</option>
+<option value="loan">سلف / عقار</option>
+<option value="expense">مصروف</option>
+</select>
+
+<button class="add" onclick="addBase()">إضافة بند</button>
+
+<div id="baseList"></div>
+</div>
+
+<!-- القروض -->
+<div class="section">
+<h3>القروض</h3>
+
+<select id="bankSelect"></select>
+<input id="bankAmount" type="number" placeholder="القسط">
+<button class="add" onclick="addRecord('bank')">إضافة</button>
+
+<div id="bankList"></div>
+</div>
+
+<!-- المصاريف -->
+<div class="section">
+<h3>المصاريف</h3>
+
+<select id="expenseSelect"></select>
+<input id="expAmount" type="number">
+<button class="add" onclick="addRecord('expense')">إضافة</button>
+
+<div id="expenseList"></div>
+</div>
+
+<!-- تحليل -->
+<div class="section">
+<input id="salary" type="number" placeholder="راتبك">
+<button onclick="analyze()">تحليل</button>
+<p id="result"></p>
+</div>
+
+<script>
+
+let db = JSON.parse(localStorage.getItem("smartDB")) || {
+base:[],
+bank:[],
+expense:[]
+};
+
+function save(){
+localStorage.setItem("smartDB",JSON.stringify(db))
+}
+
+function tab(i){
+document.querySelectorAll('.section').forEach((s,idx)=>{
+s.classList.toggle('active',idx===i)
+})
+}
+
+/* إدارة البنود */
+function addBase(){
+let name=itemName.value
+let type=itemType.value
+
+db.base.push({name,type})
+save()
+renderBase()
+loadDropdowns()
+}
+
+function renderBase(){
+let box=document.getElementById("baseList")
+box.innerHTML=""
+
+db.base.forEach((x,i)=>{
+box.innerHTML+=`
+<div class="item">
+${x.name} (${x.type})
+<br>
+<button class="del" onclick="delBase(${i})">حذف</button>
+<button class="edit" onclick="editBase(${i})">تعديل</button>
+</div>`
+})
+}
+
+function delBase(i){
+db.base.splice(i,1)
+save()
+renderBase()
+loadDropdowns()
+}
+
+function editBase(i){
+let n=prompt("اسم جديد",db.base[i].name)
+if(n) db.base[i].name=n
+save()
+renderBase()
+loadDropdowns()
+}
+
+/* تحميل القوائم */
+function loadDropdowns(){
+
+bankSelect.innerHTML=""
+expenseSelect.innerHTML=""
+
+db.base.forEach(x=>{
+let op=document.createElement("option")
+op.text=x.name
+
+if(x.type==="bank") bankSelect.add(op.cloneNode(true))
+if(x.type==="expense") expenseSelect.add(op.cloneNode(true))
+})
+
+}
+
+/* إضافة بيانات */
+function addRecord(type){
+
+if(type==="bank"){
+db.bank.push({name:bankSelect.value,amount:Number(bankAmount.value)})
+}
+if(type==="expense"){
+db.expense.push({name:expenseSelect.value,amount:Number(expAmount.value)})
+}
+
+save()
+renderAll()
+}
+
+/* عرض */
+function renderAll(){
+
+bankList.innerHTML=""
+db.bank.forEach((x,i)=>{
+bankList.innerHTML+=`
+<div class="item">
+${x.name} - ${x.amount}
+<button class="del" onclick="delRec('bank',${i})">حذف</button>
+</div>`
+})
+
+expenseList.innerHTML=""
+db.expense.forEach((x,i)=>{
+expenseList.innerHTML+=`
+<div class="item">
+${x.name} - ${x.amount}
+<button class="del" onclick="delRec('expense',${i})">حذف</button>
+</div>`
+})
+
+}
+
+function delRec(type,i){
+db[type].splice(i,1)
+save()
+renderAll()
+}
+
+/* تحليل */
+function analyze(){
+
+let salary=Number(document.getElementById("salary").value)
+
+let total=0
+db.bank.forEach(x=> total+=x.amount)
+db.expense.forEach(x=> total+=x.amount)
+
+let remain=salary-total
+
+result.innerText=`إجمالي: ${total}
+المتبقي: ${remain}`
+}
+
+/* تشغيل */
+renderBase()
+renderAll()
+loadDropdowns()
+
+</script>
+
+</body>
+</html>
